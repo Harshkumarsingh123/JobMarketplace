@@ -14,4 +14,6 @@ public class ProfileRequest {
     private String status;
     private String skills;
     private String about;
+    private Double latitude;
+    private Double longitude;
 }

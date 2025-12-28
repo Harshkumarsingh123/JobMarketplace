@@ -12,8 +12,13 @@ export const postJobApi = (jobData) => {
   });
 };
 
-export const getMyJobsApi = () => {
-  return axios.get(`${API_URL}/my`, {
+export const getMyJobsApi = () =>
+  axios.get(`${API_URL}/my`, { headers: authHeader() });
+
+export const getNearbyJobsApi = (lat, lng) =>
+  axios.get(`${API_URL}/nearby`, {
+    params: { lat, lng },     
     headers: authHeader(),
   });
-};
+
+  

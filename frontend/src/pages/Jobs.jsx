@@ -1,105 +1,107 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { getNearbyJobsApi } from "../api/jobApi";
 import "../styles/jobs.css";
 
-const dummyJobs = [
-  {
-    id: 1,
-    title: "Restaurant Helper",
-    location: "Delhi",
-    hours: "3 Hours",
-    pay: 450,
-    type: "Food",
-  },
-  {
-    id: 2,
-    title: "Fuel Station Assistant",
-    location: "Noida",
-    hours: "4 Hours",
-    pay: 600,
-    type: "Petrol Pump",
-  },
-  {
-    id: 3,
-    title: "Cafe Waiter",
-    location: "Delhi",
-    hours: "3 Hours",
-    pay: 500,
-    type: "Food",
-  },
-  {
-    id: 4,
-    title: "Delivery Helper",
-    location: "Gurgaon",
-    hours: "4 Hours",
-    pay: 700,
-    type: "Delivery",
-  },
-];
-
 const Jobs = () => {
+  const [jobs, setJobs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [errorMsg, setErrorMsg] = useState("");
+
   const [filters, setFilters] = useState({
-    location: "",
     type: "",
   });
 
-  const filteredJobs = dummyJobs.filter(
-    (job) =>
-      (filters.location === "" || job.location === filters.location) &&
-      (filters.type === "" || job.type === filters.type)
+  /* ---------------- Load Nearby Jobs ---------------- */
+  useEffect(() => {
+    if (!navigator.geolocation) {
+      setErrorMsg("Geolocation not supported by browser");
+      setLoading(false);
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+
+        try {
+          const res = await getNearbyJobsApi(lat, lng);
+          setJobs(res.data || []);
+        } catch (err) {
+          console.error(err);
+          setErrorMsg("Failed to load nearby jobs");
+        } finally {
+          setLoading(false);
+        }
+      },
+      () => {
+        setErrorMsg("Location permission denied");
+        setLoading(false);
+      }
+    );
+  }, []);
+
+  /* ---------------- Filter ---------------- */
+  const filteredJobs = jobs.filter(
+    (job) => filters.type === "" || job.type === filters.type
   );
+
+  /* ---------------- UI States ---------------- */
+  if (loading) {
+    return (
+      <section className="jobs-page">
+        <p className="loading-text">📍 Finding jobs near you...</p>
+      </section>
+    );
+  }
+
+  if (errorMsg) {
+    return (
+      <section className="jobs-page">
+        <p className="error-banner">{errorMsg}</p>
+      </section>
+    );
+  }
 
   return (
     <section className="jobs-page">
       {/* HERO */}
       <div className="jobs-hero">
-        <h1>Available Part-Time Jobs</h1>
-        <p>
-          Find nearby jobs that fit your free hours and start earning today.
-        </p>
+        <h1>Nearby Part-Time Jobs</h1>
+        <p>Jobs closest to your current location</p>
       </div>
 
-      {/* FILTERS */}
+      {/* FILTER */}
       <div className="jobs-filters">
         <select
-          onChange={(e) =>
-            setFilters({ ...filters, location: e.target.value })
-          }
-        >
-          <option value="">All Locations</option>
-          <option value="Delhi">Delhi</option>
-          <option value="Noida">Noida</option>
-          <option value="Gurgaon">Gurgaon</option>
-        </select>
-
-        <select
+          value={filters.type}
           onChange={(e) =>
             setFilters({ ...filters, type: e.target.value })
           }
         >
           <option value="">All Job Types</option>
           <option value="Food">Food</option>
-          <option value="Petrol Pump">Petrol Pump</option>
           <option value="Delivery">Delivery</option>
+          <option value="Cafe">Cafe</option>
         </select>
       </div>
 
-      {/* JOB CARDS */}
+      {/* JOBS */}
       <div className="jobs-grid">
         {filteredJobs.map((job) => (
           <div className="jobs-card" key={job.id}>
             <h3>{job.title}</h3>
-            <p>📍 Location: {job.location}</p>
-            <p>⏰ Hours: {job.hours}</p>
+            <p>📍 {job.address}</p>
+            <p>⏰ {job.hours}</p>
             <p className="pay">💰 ₹ {job.pay}</p>
 
             <span className="job-type">{job.type}</span>
-
             <button className="apply-btn">Apply Now</button>
           </div>
         ))}
 
         {filteredJobs.length === 0 && (
-          <p className="no-jobs">No jobs found for selected filters.</p>
+          <p className="no-jobs">No nearby jobs found</p>
         )}
       </div>
     </section>

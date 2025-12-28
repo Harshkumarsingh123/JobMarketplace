@@ -26,6 +26,9 @@ public class Profile {
     private String city;
     private String status;   // STUDENT | WORKING | JOB_SEEKER
     private String skills;
+    private Double latitude;
+    private Double longitude;
+
 
     @Column(length = 1000)
     private String about;

@@ -3,6 +3,8 @@ package com.jobmarketplace.backend.controller;
 import com.jobmarketplace.backend.config.JwtUtil;
 import com.jobmarketplace.backend.dto.JobRequest;
 import com.jobmarketplace.backend.entity.Job;
+import com.jobmarketplace.backend.entity.Profile;
+import com.jobmarketplace.backend.repository.ProfileRepository;
 import com.jobmarketplace.backend.services.JobService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +20,7 @@ public class JobController {
 
     private final JobService jobService;
     private final JwtUtil jwtUtil;
+    private final ProfileRepository profileRepository;
 
     private String extractEmail(HttpServletRequest request) {
         String auth = request.getHeader("Authorization");
@@ -43,4 +46,25 @@ public class JobController {
     public List<Job> getMyJobs(HttpServletRequest request) {
         return jobService.getMyJobs(extractEmail(request));
     }
+
+    @GetMapping("/nearby")
+    public List<Job> getNearbyJobs(HttpServletRequest request) {
+
+        String email = extractEmail(request);
+
+        Profile profile = profileRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Profile not found"));
+
+        if (profile.getLatitude() == null || profile.getLongitude() == null) {
+            throw new RuntimeException("Profile location not set");
+        }
+
+        return jobService.getNearestJobs(
+                profile.getLatitude(),
+                profile.getLongitude()
+        );
+    }
+
+
+
 }

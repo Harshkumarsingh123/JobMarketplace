@@ -34,6 +34,11 @@ public class ProfileService {
         profile.setStatus(request.getStatus());
         profile.setSkills(request.getSkills());
         profile.setAbout(request.getAbout());
+        profile.setAddress(request.getAddress());
+        profile.setCity(request.getCity());
+        profile.setLatitude(request.getLatitude());
+        profile.setLongitude(request.getLongitude());
+
 
         return profileRepository.save(profile);
     }
@@ -62,6 +67,8 @@ public class ProfileService {
         existing.setStatus(updatedProfile.getStatus());
         existing.setSkills(updatedProfile.getSkills());
         existing.setAbout(updatedProfile.getAbout());
+        existing.setLatitude(updatedProfile.getLatitude());
+        existing.setLongitude(updatedProfile.getLongitude());
 
         // email, id, photoPath NOT changed here
 

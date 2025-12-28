@@ -1,9 +1,24 @@
 import { useState, useEffect } from "react";
-import { GoogleMap, Marker, useLoadScript } from "@react-google-maps/api";
+import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
+
 import { postJobApi } from "../api/jobApi";
 import "../styles/postJob.css";
 
-const mapContainerStyle = {
+/* ---------------- Fix Leaflet Marker Icon ---------------- */
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl:
+    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+  iconUrl:
+    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+  shadowUrl:
+    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+});
+
+/* ---------------- Constants ---------------- */
+const mapStyle = {
   width: "100%",
   height: "300px",
 };
@@ -13,17 +28,48 @@ const defaultCenter = {
   lng: 77.209,
 };
 
-const PostJob = () => {
-  const { isLoaded } = useLoadScript({
-    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_KEY,
+/* ---------------- Reverse Geocoding (FREE) ---------------- */
+const getAddressFromLatLng = async (lat, lng) => {
+  try {
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`
+    );
+    const data = await res.json();
+    return data.display_name || "";
+  } catch {
+    return "";
+  }
+};
+
+/* ---------------- Map Click Handler ---------------- */
+const LocationPicker = ({ setJob, setMapCenter }) => {
+  useMapEvents({
+    click: async (e) => {
+      const lat = e.latlng.lat;
+      const lng = e.latlng.lng;
+
+      const fullAddress = await getAddressFromLatLng(lat, lng);
+
+      setMapCenter({ lat, lng });
+      setJob((prev) => ({
+        ...prev,
+        lat,
+        lng,
+        address: fullAddress,
+      }));
+    },
   });
 
+  return null;
+};
+
+const PostJob = () => {
   const [mapCenter, setMapCenter] = useState(defaultCenter);
 
   const [job, setJob] = useState({
     title: "",
-    address: "",     // ✅ mandatory
-    location: "",    // ❌ optional
+    address: "",      // mandatory
+    location: "",     // optional
     lat: null,
     lng: null,
     startDate: "",
@@ -37,63 +83,29 @@ const PostJob = () => {
   const [successMsg, setSuccessMsg] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
 
-  /* ---------------- Reverse Geocoding ---------------- */
-  const getAddressFromLatLng = async (lat, lng) => {
-    try {
-      const res = await fetch(
-        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${import.meta.env.VITE_GOOGLE_MAPS_KEY}`
-      );
-      const data = await res.json();
-
-      if (data.status === "OK") {
-        return data.results[0].formatted_address;
-      }
-    } catch (err) {
-      console.error(err);
-    }
-    return "";
-  };
-
   /* ---------------- Auto Detect User Location ---------------- */
   useEffect(() => {
     if (!navigator.geolocation) return;
 
-    navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        const lat = pos.coords.latitude;
-        const lng = pos.coords.longitude;
+    navigator.geolocation.getCurrentPosition(async (pos) => {
+      const lat = pos.coords.latitude;
+      const lng = pos.coords.longitude;
 
-        const fullAddress = await getAddressFromLatLng(lat, lng);
+      const fullAddress = await getAddressFromLatLng(lat, lng);
 
-        setMapCenter({ lat, lng });
-        setJob((prev) => ({
-          ...prev,
-          lat,
-          lng,
-          address: fullAddress,
-        }));
-      },
-      () => console.warn("Location permission denied")
-    );
+      setMapCenter({ lat, lng });
+      setJob((prev) => ({
+        ...prev,
+        lat,
+        lng,
+        address: fullAddress,
+      }));
+    });
   }, []);
 
   /* ---------------- Handlers ---------------- */
   const handleChange = (e) => {
     setJob({ ...job, [e.target.name]: e.target.value });
-  };
-
-  const handleMapClick = async (e) => {
-    const lat = e.latLng.lat();
-    const lng = e.latLng.lng();
-    const fullAddress = await getAddressFromLatLng(lat, lng);
-
-    setMapCenter({ lat, lng });
-    setJob((prev) => ({
-      ...prev,
-      lat,
-      lng,
-      address: fullAddress,
-    }));
   };
 
   const handleSubmit = async (e) => {
@@ -138,8 +150,6 @@ const PostJob = () => {
     }
   };
 
-  if (!isLoaded) return <p>Loading Map...</p>;
-
   return (
     <section className="postjob-page">
       {/* HERO */}
@@ -162,26 +172,28 @@ const PostJob = () => {
             required
           />
 
-          {/* MAP */}
-          <GoogleMap
-            mapContainerStyle={mapContainerStyle}
-            zoom={14}
-            center={mapCenter}
-            onClick={handleMapClick}
-          >
-            {job.lat && <Marker position={{ lat: job.lat, lng: job.lng }} />}
-          </GoogleMap>
+          {/* FREE MAP */}
+          <MapContainer center={mapCenter} zoom={14} style={mapStyle}>
+            <TileLayer
+              attribution="© OpenStreetMap contributors"
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            />
 
-          {/* FULL ADDRESS (MANDATORY) */}
+            <LocationPicker setJob={setJob} setMapCenter={setMapCenter} />
+
+            {job.lat && <Marker position={[job.lat, job.lng]} />}
+          </MapContainer>
+
+          {/* FULL ADDRESS */}
           <input
             name="address"
             placeholder="Full Address"
-            value={job.address}
+            value={job.address || ""}
             onChange={handleChange}
             required
           />
 
-          {/* LOCATION / AREA (OPTIONAL) */}
+          {/* AREA / LANDMARK */}
           <input
             name="location"
             placeholder="Area / Landmark (optional)"
@@ -212,7 +224,6 @@ const PostJob = () => {
               name="endTime"
               value={job.endTime}
               onChange={handleChange}
-              placeholder="End Time (optional)"
             />
           </div>
 

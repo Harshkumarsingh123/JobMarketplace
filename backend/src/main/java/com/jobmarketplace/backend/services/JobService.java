@@ -49,6 +49,13 @@ public class JobService {
     }
 
     public List<Job> getMyJobs(String email) {
-        return jobRepository.findByPostedByEmail(email);
+        return jobRepository.findByPostedByEmailOrderByCreatedAtDesc(email);
     }
+
+    public List<Job> getNearestJobs(double lat, double lng) {
+        double DEFAULT_RADIUS = 5.0; // 5 KM
+        return jobRepository.findNearestJobs(lat, lng, DEFAULT_RADIUS);
+    }
+
+
 }
