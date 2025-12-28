@@ -1,0 +1,116 @@
+/* CONTAINER */
+.auth-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  background: linear-gradient(135deg, #4f46e5, #06b6d4);
+}
+
+/* BOX */
+.auth-box {
+  background: white;
+  padding: 40px;
+  width: 100%;
+  max-width: 420px;
+  border-radius: 18px;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.25);
+  text-align: center;
+}
+
+/* PROFILE */
+.profile-box {
+  max-width: 520px;
+}
+
+/* TEXT */
+.auth-box h2 {
+  margin-bottom: 8px;
+}
+
+.auth-subtitle {
+  color: #555;
+  margin-bottom: 25px;
+}
+
+.auth-text {
+  margin-top: 20px;
+  font-size: 0.9rem;
+}
+
+.auth-text a {
+  color: #4f46e5;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+/* INPUTS */
+.auth-box input,
+.auth-box select,
+.auth-box textarea {
+  width: 100%;
+  padding: 12px 14px;
+  margin-bottom: 15px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  font-size: 0.95rem;
+}
+
+.auth-box textarea {
+  resize: none;
+  height: 80px;
+}
+
+/* BUTTON */
+.auth-box button {
+  width: 100%;
+  padding: 13px;
+  border-radius: 25px;
+  border: none;
+  background: #4f46e5;
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.auth-box button:hover {
+  background: #4338ca;
+  transform: translateY(-2px);
+}
+
+/* FEEDBACK */
+.error-text {
+  color: red;
+  margin-top: 10px;
+}
+
+.success-text {
+  color: green;
+  margin-top: 10px;
+}
+
+/* ANIMATION */
+.animate-up {
+  animation: fadeUp 0.8s ease;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* RESPONSIVE */
+@media (max-width: 480px) {
+  .auth-box {
+    padding: 30px 20px;
+  }
+}

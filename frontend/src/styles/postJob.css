@@ -1,0 +1,65 @@
+.postjob-page {
+  padding: 80px 20px;
+  background: #eef2ff;
+  min-height: 100vh;
+}
+
+/* HERO */
+.postjob-hero {
+  text-align: center;
+  max-width: 800px;
+  margin: auto;
+  margin-bottom: 50px;
+  animation: fadeUp 1s ease;
+}
+
+.postjob-hero h1 {
+  font-size: 2.8rem;
+  margin-bottom: 10px;
+}
+
+.postjob-hero p {
+  color: #555;
+}
+
+/* CARD */
+.postjob-card {
+  max-width: 500px;
+  margin: auto;
+  background: white;
+  padding: 35px;
+  border-radius: 20px;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.08);
+  animation: fadeUp 1.2s ease;
+}
+
+.postjob-card input {
+  width: 100%;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+  border-radius: 12px;
+  border: 1px solid #c7d2fe;
+}
+
+.postjob-card button {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 30px;
+  background: linear-gradient(135deg, #4f46e5, #6366f1);
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* ANIMATION */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
