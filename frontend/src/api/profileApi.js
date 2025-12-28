@@ -1,19 +1,29 @@
 import axios from "axios";
 
-const PROFILE_URL = "http://localhost:8080/api/profile";
+const API_URL = "http://localhost:8080/api/profile";
 
-export const getProfileApi = () => {
-  return axios.get(PROFILE_URL, {
-    headers: {
-      Authorization: "Bearer " + localStorage.getItem("token"),
-    },
-  });
+const authHeader = () => ({
+  Authorization: "Bearer " + localStorage.getItem("token"),
+});
+
+export const getProfileApi = () =>
+  axios.get(API_URL, { headers: authHeader() });
+
+export const saveProfileApi = (data) =>
+  axios.put(API_URL, data, { headers: authHeader() });
+
+export const uploadProfilePhotoApi = (file) => {
+  const formData = new FormData();
+  formData.append("photo", file);
+
+  return axios.post(
+    "http://localhost:8080/api/profile/upload-photo",
+    formData,
+    {
+      headers: {
+        Authorization: "Bearer " + localStorage.getItem("token"),
+      },
+    }
+  );
 };
 
-export const saveProfileApi = (data) => {
-  return axios.post(PROFILE_URL, data, {
-    headers: {
-      Authorization: "Bearer " + localStorage.getItem("token"),
-    },
-  });
-};

@@ -1,12 +1,25 @@
 import "../styles/home.css";
 import { useNavigate } from "react-router-dom";
+import { getUserFromToken } from "../utils/jwtUtils";
+import { useReveal } from "../hooks/useReveal";
 
 const Home = () => {
   const navigate = useNavigate();
+  const user = getUserFromToken();
+
+  const isLoggedIn = Boolean(user);
+  const role = user?.role;
+
+  // reveal hooks
+  const [statsRef, statsShow] = useReveal();
+  const [audienceRef, audienceShow] = useReveal();
+  const [earnRef, earnShow] = useReveal();
+  const [testRef, testShow] = useReveal();
+  const [trustRef, trustShow] = useReveal();
 
   return (
     <>
-      {/* HERO SECTION */}
+      {/* HERO */}
       <section className="hero">
         <div className="hero-content">
           <h1 className="hero-title">
@@ -15,24 +28,42 @@ const Home = () => {
 
           <p className="hero-subtitle">
             Work for 3–4 hours at nearby restaurants, fuel stations, cafés,
-            bars, delivery points & more. Perfect for students, part-timers,
-            and anyone looking for extra income.
+            bars, delivery points & more.
           </p>
 
           <div className="hero-buttons">
-            <button
-              className="btn-primary"
-              onClick={() => navigate("/signup")}
-            >
-              Register & Start Earning
-            </button>
+            {!isLoggedIn && (
+              <>
+                <button className="btn-primary" onClick={() => navigate("/signup")}>
+                  Register & Start Earning
+                </button>
+                <button className="btn-secondary" onClick={() => navigate("/login")}>
+                  Find Nearby Jobs
+                </button>
+              </>
+            )}
 
-            <button
-              className="btn-secondary"
-              onClick={() => navigate("/login")}
-            >
-              Find Nearby Jobs
-            </button>
+            {isLoggedIn && role === "JOB_SEEKER" && (
+              <>
+                <button className="btn-primary" onClick={() => navigate("/jobs")}>
+                  Find Jobs
+                </button>
+                <button className="btn-secondary" onClick={() => navigate("/applications")}>
+                  My Applications
+                </button>
+              </>
+            )}
+
+            {isLoggedIn && role === "JOB_PROVIDER" && (
+              <>
+                <button className="btn-primary" onClick={() => navigate("/post-job")}>
+                  Post a Job
+                </button>
+                <button className="btn-secondary" onClick={() => navigate("/my-jobs")}>
+                  My Jobs
+                </button>
+              </>
+            )}
           </div>
         </div>
       </section>
@@ -42,90 +73,83 @@ const Home = () => {
         <h2 className="section-title">Why Choose Our Platform?</h2>
 
         <div className="feature-grid">
-          <div className="card">
-            <span className="icon">📍</span>
-            <h3>Location Based Jobs</h3>
-            <p>
-              Find work near your home, hostel, or college without long travel.
-            </p>
-          </div>
-
-          <div className="card">
-            <span className="icon">⏰</span>
-            <h3>Flexible Working Hours</h3>
-            <p>
-              Work only when you are free – 2, 3 or 4 hours a day.
-            </p>
-          </div>
-
-          <div className="card">
-            <span className="icon">💰</span>
-            <h3>Quick Earnings</h3>
-            <p>
-              Daily or weekly payments based on job type.
-            </p>
-          </div>
-
-          <div className="card">
-            <span className="icon">🔐</span>
-            <h3>Safe & Secure</h3>
-            <p>
-              Verified employers and secure user profiles.
-            </p>
-          </div>
+          {[
+            ["📍", "Location Based Jobs", "Find work near your home or college"],
+            ["⏰", "Flexible Hours", "Work only when you are free"],
+            ["💰", "Quick Earnings", "Daily or weekly payments"],
+            ["🔐", "Safe & Secure", "Verified employers"],
+          ].map(([icon, title, desc], i) => (
+            <div className="card animate-up" style={{ animationDelay: `${i * 0.1}s` }} key={title}>
+              <span className="icon">{icon}</span>
+              <h3>{title}</h3>
+              <p>{desc}</p>
+            </div>
+          ))}
         </div>
       </section>
 
-      {/* JOB CATEGORIES */}
-      <section className="steps">
-        <h2 className="section-title">Available Job Categories</h2>
+      {/* STATS */}
+      <section ref={statsRef} className={`stats ${statsShow ? "show" : ""}`}>
+        <div className="stat-card"><h3>10K+</h3><p>Job Seekers</p></div>
+        <div className="stat-card"><h3>2K+</h3><p>Employers</p></div>
+        <div className="stat-card"><h3>15K+</h3><p>Jobs Done</p></div>
+        <div className="stat-card"><h3>₹1Cr+</h3><p>Earnings</p></div>
+      </section>
 
-        <div className="steps-grid">
-          <div className="step-card">🍽 Restaurant / Café Helper</div>
-          <div className="step-card">⛽ Fuel Station Assistant</div>
-          <div className="step-card">🚗 Driver / Delivery Helper</div>
-          <div className="step-card">🏪 Shop & Store Support</div>
-          <div className="step-card">🎧 Event & Temporary Staff</div>
-          <div className="step-card">🛠 Skill-Based Local Work</div>
+      {/* AUDIENCE */}
+      <section ref={audienceRef} className={`audience ${audienceShow ? "show" : ""}`}>
+        <h2 className="section-title">Who Is This Platform For?</h2>
+
+        <div className="audience-grid">
+          <div className="audience-card">🎓<h3>Students</h3><p>Earn without affecting studies</p></div>
+          <div className="audience-card">🧑‍💼<h3>Part-Timers</h3><p>Flexible income</p></div>
+          <div className="audience-card">🏪<h3>Businesses</h3><p>Hire fast for short shifts</p></div>
         </div>
       </section>
 
-      {/* HOW IT WORKS */}
-      <section className="how">
-        <h2 className="section-title">How It Works</h2>
+      {/* EARN */}
+      <section ref={earnRef} className={`earn ${earnShow ? "show" : ""}`}>
+        <h2 className="section-title">How You Earn</h2>
 
-        <div className="how-grid">
-          <div className="how-card">
-            <h3>1️⃣ Create Profile</h3>
-            <p>Add your skills, location & availability.</p>
-          </div>
+        <div className="earn-grid">
+          <div className="earn-card">1️⃣ Pick Job</div>
+          <div className="earn-card">2️⃣ Work 3–4 Hours</div>
+          <div className="earn-card">3️⃣ Get Paid</div>
+        </div>
+      </section>
 
-          <div className="how-card">
-            <h3>2️⃣ Find or Post Jobs</h3>
-            <p>Search nearby jobs or post work as an employer.</p>
-          </div>
+      {/* TESTIMONIALS */}
+      <section ref={testRef} className={`testimonials ${testShow ? "show" : ""}`}>
+        <h2 className="section-title">What Users Say</h2>
 
-          <div className="how-card">
-            <h3>3️⃣ Work & Earn</h3>
-            <p>Complete the job and get paid easily.</p>
-          </div>
+        <div className="testimonial-grid">
+          <div className="testimonial-card">“Earn daily after college.” — Rohit</div>
+          <div className="testimonial-card">“Found staff quickly.” — Ankit</div>
+          <div className="testimonial-card">“Simple & real jobs.” — Neha</div>
+        </div>
+      </section>
+
+      {/* TRUST */}
+      <section ref={trustRef} className={`trust ${trustShow ? "show" : ""}`}>
+        <h2 className="section-title">Why Trust Us?</h2>
+
+        <div className="trust-grid">
+          <div className="trust-card">✅ Verified Employers</div>
+          <div className="trust-card">🔐 Secure Payments</div>
+          <div className="trust-card">📍 Local Jobs</div>
+          <div className="trust-card">⚡ Fast Hiring</div>
         </div>
       </section>
 
       {/* CTA */}
-      <section className="cta">
-        <h2>Turn Your Free Time Into Income</h2>
-        <p>
-          Students, job seekers & local businesses — this platform is built for you.
-        </p>
-
-        <button
-          className="btn-primary"
-          onClick={() => navigate("/signup")}
-        >
-          Get Started Now
-        </button>
-      </section>
+      {!isLoggedIn && (
+        <section className="cta">
+          <h2>Turn Your Free Time Into Income</h2>
+          <button className="btn-primary" onClick={() => navigate("/signup")}>
+            Get Started Now
+          </button>
+        </section>
+      )}
     </>
   );
 };

@@ -341,3 +341,118 @@ body {
     gap: 10px;
   }
 }
+
+/* STATS */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  padding: 80px 20px;
+}
+
+.stat-card {
+  background: linear-gradient(135deg, #4f46e5, #6366f1);
+  color: white;
+  padding: 30px;
+  border-radius: 20px;
+  text-align: center;
+  animation: fadeUp 1s ease;
+}
+
+.stat-card h3 {
+  font-size: 2rem;
+}
+
+/* AUDIENCE */
+.audience {
+  padding: 80px 20px;
+}
+
+.audience-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.audience-card {
+  background: white;
+  padding: 30px;
+  border-radius: 18px;
+  text-align: center;
+  animation: fadeUp 1s ease;
+}
+
+/* EARN */
+.earn {
+  padding: 80px 20px;
+}
+
+.earn-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.earn-card {
+  background: linear-gradient(135deg, #6366f1, #818cf8);
+  color: white;
+  padding: 30px;
+  border-radius: 18px;
+  animation: fadeUp 1s ease;
+}
+
+/* TESTIMONIALS */
+.testimonials {
+  padding: 80px 20px;
+}
+
+.testimonial-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.testimonial-card {
+  background: white;
+  padding: 30px;
+  border-radius: 18px;
+  animation: fadeUp 1s ease;
+}
+
+/* TRUST */
+.trust {
+  padding: 80px 20px;
+}
+
+.trust-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.trust-card {
+  background: linear-gradient(135deg, #4f46e5, #6366f1);
+  color: white;
+  padding: 25px;
+  border-radius: 18px;
+  text-align: center;
+  animation: fadeUp 1s ease;
+}
+.card,
+.stat-card,
+.audience-card,
+.earn-card,
+.testimonial-card,
+.trust-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover,
+.stat-card:hover,
+.audience-card:hover,
+.earn-card:hover,
+.testimonial-card:hover,
+.trust-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
+}

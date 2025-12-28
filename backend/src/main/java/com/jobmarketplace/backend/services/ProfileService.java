@@ -1,25 +1,32 @@
 package com.jobmarketplace.backend.services;
 
-import com.jobmarketplace.backend.dto.ProfileRequest;
-import com.jobmarketplace.backend.entity.User;
-import com.jobmarketplace.backend.entity.UserProfile;
-import com.jobmarketplace.backend.repository.UserProfileRepository;
+import com.jobmarketplace.backend.entity.Profile;
+import com.jobmarketplace.backend.repository.ProfileRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
 public class ProfileService {
 
-    private final UserProfileRepository profileRepository;
+    private final ProfileRepository profileRepository;
+    private final FileStorageService fileStorageService;
 
-    public UserProfile saveOrUpdateProfile(User user, ProfileRequest request) {
+    public Profile getProfile(String email) {
+        return profileRepository.findByEmail(email)
+                .orElse(Profile.builder()
+                        .email(email)
+                        .build());
+    }
 
-        UserProfile profile = profileRepository
-                .findByUser(user)
-                .orElse(new UserProfile());
+    public Profile saveProfile(String email, Profile request) {
 
-        profile.setUser(user);
+        Profile profile = profileRepository.findByEmail(email)
+                .orElse(new Profile());
+
+        profile.setEmail(email);
+        profile.setName(request.getName());
         profile.setAge(request.getAge());
         profile.setPhone(request.getPhone());
         profile.setAddress(request.getAddress());
@@ -31,7 +38,35 @@ public class ProfileService {
         return profileRepository.save(profile);
     }
 
-    public UserProfile getProfile(User user) {
-        return profileRepository.findByUser(user).orElse(null);
+    public Profile uploadProfilePhoto(String email, MultipartFile photo) throws Exception {
+
+        Profile profile = profileRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Profile not found"));
+
+        String photoPath = fileStorageService.saveProfilePhoto(photo);
+        profile.setPhotoPath(photoPath);
+
+        return profileRepository.save(profile);
     }
+
+    public Profile updateProfile(String email, Profile updatedProfile) {
+
+        Profile existing = profileRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Profile not found"));
+
+        existing.setName(updatedProfile.getName());
+        existing.setAge(updatedProfile.getAge());
+        existing.setPhone(updatedProfile.getPhone());
+        existing.setAddress(updatedProfile.getAddress());
+        existing.setCity(updatedProfile.getCity());
+        existing.setStatus(updatedProfile.getStatus());
+        existing.setSkills(updatedProfile.getSkills());
+        existing.setAbout(updatedProfile.getAbout());
+
+        // email, id, photoPath NOT changed here
+
+        return profileRepository.save(existing);
+    }
+
 }
+
