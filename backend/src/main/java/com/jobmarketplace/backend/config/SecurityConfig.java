@@ -39,6 +39,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/profile/upload-photo").permitAll()
                         .requestMatchers("/api/images/**").permitAll()
                         .requestMatchers("/api/profile/**").authenticated()
+                        .requestMatchers("/api/jobs/**").authenticated()
                         .anyRequest().authenticated()
                 )
 
