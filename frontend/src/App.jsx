@@ -13,7 +13,13 @@ import PostJob from "./pages/PostJob";
 import Applications from "./pages/Applications";
 import MyJobs from "./pages/MyJobs";
 
+//  ADD THIS IMPORT
+import { useWebSocketNotifications } from "./hooks/useWebSocketNotifications";
+
 function App() {
+  // CONNECT WEBSOCKET ONCE (GLOBAL)
+  useWebSocketNotifications();
+
   return (
     <Routes>
       {/* ROUTES WITH HEADER & FOOTER */}

@@ -1,55 +1,40 @@
+import { useEffect, useState } from "react";
+import { getMyApplicationsApi } from "../api/applicationApi";
 import "../styles/application.css";
 
-const dummyApplications = [
-  {
-    id: 1,
-    title: "Restaurant Helper",
-    location: "Delhi",
-    hours: "3 Hours",
-    pay: 450,
-    status: "PENDING",
-  },
-  {
-    id: 2,
-    title: "Delivery Helper",
-    location: "Gurgaon",
-    hours: "4 Hours",
-    pay: 700,
-    status: "APPROVED",
-  },
-  {
-    id: 3,
-    title: "Cafe Waiter",
-    location: "Noida",
-    hours: "3 Hours",
-    pay: 500,
-    status: "REJECTED",
-  },
-];
-
 const Applications = () => {
+  const [apps, setApps] = useState([]);
+
+  useEffect(() => {
+    getMyApplicationsApi()
+      .then((res) => setApps(res.data))
+      .catch((err) => console.error(err));
+  }, []);
+
   return (
     <section className="applications-page">
-      {/* HERO */}
       <div className="applications-hero">
         <h1>My Applications</h1>
-        <p>Track the status of jobs you have applied for</p>
+        <p>Track the status of jobs you applied for</p>
       </div>
 
-      {/* APPLICATION CARDS */}
       <div className="applications-grid">
-        {dummyApplications.map((job) => (
-          <div className="applications-card" key={job.id}>
-            <h3>{job.title}</h3>
-            <p>📍 Location: {job.location}</p>
-            <p>⏰ Hours: {job.hours}</p>
-            <p className="pay">💰 ₹ {job.pay}</p>
+        {apps.map((app) => (
+          <div className="applications-card" key={app.id}>
+            <h3>{app.job.title}</h3>
+            <p>📍 {app.job.address}</p>
+            <p>⏰ {app.job.hours}</p>
+            <p className="pay">💰 ₹ {app.job.pay}</p>
 
-            <span className={`status ${job.status.toLowerCase()}`}>
-              {job.status}
+            <span className={`status ${app.status.toLowerCase()}`}>
+              {app.status}
             </span>
           </div>
         ))}
+
+        {apps.length === 0 && (
+          <p className="no-jobs">You haven’t applied to any jobs yet</p>
+        )}
       </div>
     </section>
   );

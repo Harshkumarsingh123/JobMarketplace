@@ -1,16 +1,21 @@
 import { Link, useNavigate } from "react-router-dom";
 import "../styles/home.css";
 import { useAuth } from "../context/AuthContext";
+import { useNotifications } from "../context/NotificationContext";
+import { useState } from "react";
 
 const Header = () => {
   const navigate = useNavigate();
-  const { user, logout } = useAuth(); // SINGLE SOURCE OF TRUTH
+  const { user, logout } = useAuth();
+  const { notifications, unreadCount, markAllRead } = useNotifications();
+
+  const [open, setOpen] = useState(false);
 
   const isLoggedIn = Boolean(user);
   const role = user?.role;
 
   const handleLogout = () => {
-    logout();               // updates state + removes token
+    logout();
     navigate("/");
   };
 
@@ -22,18 +27,14 @@ const Header = () => {
         </div>
 
         <nav className="nav">
-          {/* PUBLIC */}
           <Link to="/">Home</Link>
           <Link to="/about">About</Link>
           <Link to="/help">Help</Link>
 
-          {/* BEFORE LOGIN */}
           {!isLoggedIn && <Link to="/login">Login</Link>}
 
-          {/* AFTER LOGIN */}
           {isLoggedIn && (
             <>
-              {/* ROLE BASED */}
               {role === "JOB_SEEKER" && (
                 <>
                   <Link to="/jobs">Find Jobs</Link>
@@ -48,9 +49,38 @@ const Header = () => {
                 </>
               )}
 
-              {/* COMMON */}
               <Link to="/profile">Profile</Link>
-              {/* <span className="welcome-text">Hi</span> */}
+
+              {/* 🔔 NOTIFICATION BELL */}
+              <div className="notification-wrapper">
+                <span
+                  className="bell"
+                  onClick={() => {
+                    setOpen(!open);
+                    markAllRead();
+                  }}
+                >
+                  🔔
+                  {unreadCount > 0 && (
+                    <span className="badge">{unreadCount}</span>
+                  )}
+                </span>
+
+                {open && (
+                  <div className="notification-dropdown">
+                    {notifications.length === 0 && (
+                      <p className="empty">No notifications</p>
+                    )}
+
+                    {notifications.map((n, i) => (
+                      <div key={i} className="notification-item">
+                        {n.message}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
               <button className="logout-btn" onClick={handleLogout}>
                 Logout
               </button>

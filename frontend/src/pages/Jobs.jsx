@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { getNearbyJobsApi } from "../api/jobApi";
 import "../styles/jobs.css";
+import { applyJobApi } from "../api/applicationApi";
+
 
 const Jobs = () => {
   const [jobs, setJobs] = useState([]);
@@ -40,6 +42,20 @@ const Jobs = () => {
       }
     );
   }, []);
+
+  const handleApply = async (jobId) => {
+  try {
+    await applyJobApi(jobId);
+
+    // remove job after apply
+    setJobs((prev) => prev.filter((job) => job.id !== jobId));
+
+    alert("✅ Application sent successfully");
+  } catch (err) {
+    alert(err.response?.data || "❌ Already applied");
+  }
+};
+
 
   /* ---------------- Filter ---------------- */
   const filteredJobs = jobs.filter(
@@ -96,7 +112,9 @@ const Jobs = () => {
             <p className="pay">💰 ₹ {job.pay}</p>
 
             <span className="job-type">{job.type}</span>
-            <button className="apply-btn">Apply Now</button>
+            <button className="apply-btn" onClick={() => handleApply(job.id)}>
+              Apply Now
+              </button>
           </div>
         ))}
 
