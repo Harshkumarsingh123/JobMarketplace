@@ -1,7 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 import Layout from "./components/Layout";
 import ProtectedRoute from "./components/ProtectedRoute";
-
+import JobApplicants from "./pages/JobApplicants";
 import Home from "./pages/Home";
 import About from "./pages/About";
 import Help from "./pages/Help";
@@ -71,6 +71,14 @@ function App() {
           element={
             <ProtectedRoute>
               <MyJobs />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/my-jobs/:jobId"
+          element={
+            <ProtectedRoute>
+              <JobApplicants />
             </ProtectedRoute>
           }
         />

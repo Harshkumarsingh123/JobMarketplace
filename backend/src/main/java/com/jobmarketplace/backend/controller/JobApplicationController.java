@@ -47,8 +47,20 @@ public class JobApplicationController {
     @PatchMapping("/{id}/status")
     public void updateStatus(
             @PathVariable Long id,
-            @RequestParam ApplicationStatus status
+            @RequestParam ApplicationStatus status,
+            HttpServletRequest request
     ) {
-        applicationService.updateStatus(id, status);
+        String providerEmail = extractEmail(request);
+        applicationService.updateStatus(id, status,providerEmail);
     }
+
+    @GetMapping("/job/{jobId}")
+    public List<JobApplication> applicantsForJob(
+            @PathVariable Long jobId,
+            HttpServletRequest request
+    ) {
+        String email = extractEmail(request);
+        return applicationService.getApplicantsForJob(jobId, email);
+    }
+
 }

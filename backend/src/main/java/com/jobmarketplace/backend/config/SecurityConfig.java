@@ -40,21 +40,28 @@ public class SecurityConfig {
                 )
 
                 .authorizeHttpRequests(auth -> auth
+
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/images/**").permitAll()
-                        .requestMatchers("/ws/**").permitAll()
+
+                        .requestMatchers(
+                                "/api/auth/**",
+                                "/api/images/**",
+                                "/ws/**"
+                        ).permitAll()
+
+
                         .requestMatchers("/api/profile/**").authenticated()
                         .requestMatchers("/api/jobs/**").authenticated()
                         .requestMatchers("/api/applications/**").authenticated()
+
+
                         .anyRequest().authenticated()
                 )
 
-                // Disable default auth mechanisms
                 .httpBasic(Customizer.withDefaults())
                 .formLogin(form -> form.disable())
 
-                // JWT Filter
+
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

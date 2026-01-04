@@ -18,6 +18,11 @@ export const getMyApplicationsApi = () =>
 export const getReceivedApplicationsApi = () =>
   axios.get(`${API_URL}/received`, { headers: authHeader() });
 
+export const getApplicantsForJobApi = (jobId) =>
+  axios.get(`${API_URL}/job/${jobId}`, {
+    headers: authHeader(),
+  });
+
 // APPROVE / REJECT
 export const updateApplicationStatusApi = (id, status) =>
   axios.patch(

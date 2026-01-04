@@ -1,9 +1,8 @@
+import SockJS from "sockjs-client";
 import { Client } from "@stomp/stompjs";
 import { useEffect } from "react";
-import { useNotifications } from "../context/NotificationContext";
 import { useAuth } from "../context/AuthContext";
-
-const WS_URL = "ws://localhost:8080/ws"; // 🔥 native websocket
+import { useNotifications } from "../context/NotificationContext";
 
 export const useWebSocketNotifications = () => {
   const { user } = useAuth();
@@ -12,29 +11,20 @@ export const useWebSocketNotifications = () => {
   useEffect(() => {
     if (!user) return;
 
+    const socket = new SockJS("http://localhost:8080/ws");
+
     const client = new Client({
-      brokerURL: WS_URL, 
+      webSocketFactory: () => socket,
       reconnectDelay: 5000,
-      debug: () => {},
     });
 
     client.onConnect = () => {
-      const topic =
-        user.role === "JOB_PROVIDER"
-          ? `/topic/provider/${user.email}`
-          : `/topic/seeker/${user.email}`;
-
-      client.subscribe(topic, (msg) => {
+      client.subscribe("/user/queue/notifications", (msg) => {
         addNotification(JSON.parse(msg.body));
       });
     };
 
-    client.onStompError = (frame) => {
-      console.error("Broker error:", frame.headers["message"]);
-    };
-
     client.activate();
-
     return () => client.deactivate();
   }, [user]);
 };

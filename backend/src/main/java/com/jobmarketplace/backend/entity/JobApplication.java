@@ -39,4 +39,15 @@ public class JobApplication {
     private ApplicationStatus status;
 
     private LocalDateTime appliedAt;
+
+    @PrePersist
+    public void prePersist() {
+        if (appliedAt == null) {
+            appliedAt = LocalDateTime.now();
+        }
+        if (status == null) {
+            status = ApplicationStatus.PENDING;
+        }
+    }
+
 }

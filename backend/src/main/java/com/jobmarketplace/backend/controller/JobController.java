@@ -2,6 +2,7 @@ package com.jobmarketplace.backend.controller;
 
 import com.jobmarketplace.backend.config.JwtUtil;
 import com.jobmarketplace.backend.dto.JobRequest;
+import com.jobmarketplace.backend.dto.ProviderJobDTO;
 import com.jobmarketplace.backend.entity.Job;
 import com.jobmarketplace.backend.entity.Profile;
 import com.jobmarketplace.backend.repository.ProfileRepository;
@@ -43,28 +44,26 @@ public class JobController {
     // View own jobs
     @PreAuthorize("hasAuthority('ROLE_JOB_PROVIDER')")
     @GetMapping("/my")
-    public List<Job> getMyJobs(HttpServletRequest request) {
-        return jobService.getMyJobs(extractEmail(request));
+    public List<ProviderJobDTO> getMyJobs(HttpServletRequest request) {
+        return jobService.getMyJobsWithApplicants(extractEmail(request));
     }
+
+
 
     @GetMapping("/nearby")
-    public List<Job> getNearbyJobs(HttpServletRequest request) {
-
+    public List<Job> getNearbyJobs(
+            HttpServletRequest request,
+            @RequestParam double lat,
+            @RequestParam double lng
+    ) {
         String email = extractEmail(request);
 
-        Profile profile = profileRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Profile not found"));
-
-        if (profile.getLatitude() == null || profile.getLongitude() == null) {
-            throw new RuntimeException("Profile location not set");
-        }
-
-        return jobService.getNearestJobs(
-                profile.getLatitude(),
-                profile.getLongitude()
+        return jobService.getNearbyJobsForSeeker(
+                email,
+                lat,
+                lng
         );
     }
-
 
 
 }

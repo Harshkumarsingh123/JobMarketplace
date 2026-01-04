@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import axios from "axios";
 import { useAuth } from "./AuthContext";
+import SockJS from "sockjs-client";
+import Stomp from "stompjs";
 
 const NotificationContext = createContext();
 
@@ -8,34 +9,39 @@ export const NotificationProvider = ({ children }) => {
   const { user } = useAuth();
   const [notifications, setNotifications] = useState([]);
 
-  // ✅ LOAD NOTIFICATIONS FROM BACKEND
   useEffect(() => {
     if (!user) return;
 
-    axios
-      .get("http://localhost:8080/api/notifications", {
-        headers: {
-          Authorization: "Bearer " + localStorage.getItem("token"),
-        },
-      })
-      .then((res) => setNotifications(res.data))
-      .catch(console.error);
+    const socket = new SockJS("http://localhost:8080/ws");
+    const stompClient = Stomp.over(socket);
+
+    stompClient.connect({}, () => {
+      stompClient.subscribe(
+        `/user/queue/notifications`,
+        (msg) => {
+          const notification = JSON.parse(msg.body);
+          addNotification(notification);
+        }
+      );
+    });
+
+    return () => stompClient.disconnect();
   }, [user]);
 
   const addNotification = (notification) => {
     setNotifications((prev) => [
-      { ...notification, isRead: false },
+      { ...notification, read: false },
       ...prev,
     ]);
   };
 
   const markAllRead = () => {
     setNotifications((prev) =>
-      prev.map((n) => ({ ...n, isRead: true }))
+      prev.map((n) => ({ ...n, read: true }))
     );
   };
 
-  const unreadCount = notifications.filter((n) => !n.isRead).length;
+  const unreadCount = notifications.filter((n) => !n.read).length;
 
   return (
     <NotificationContext.Provider

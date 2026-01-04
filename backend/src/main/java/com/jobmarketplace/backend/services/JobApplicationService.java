@@ -8,6 +8,7 @@ import com.jobmarketplace.backend.repository.JobApplicationRepository;
 import com.jobmarketplace.backend.repository.JobRepository;
 import com.jobmarketplace.backend.repository.ProfileRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -20,6 +21,9 @@ public class JobApplicationService {
     private final JobApplicationRepository applicationRepository;
     private final JobRepository jobRepository;
     private final ProfileRepository profileRepository;
+    private final NotificationService notificationService;
+    private final WebSocketNotificationService webSocketNotificationService;
+
 
     public void applyForJob(Long jobId, String applicantEmail) {
 
@@ -45,6 +49,8 @@ public class JobApplicationService {
                 .build();
 
         applicationRepository.save(application);
+
+        webSocketNotificationService.notifyProviderOnApply(application);
     }
 
     public List<JobApplication> myApplications(String email) {
@@ -55,11 +61,43 @@ public class JobApplicationService {
         return applicationRepository.findByJobProviderEmailOrderByAppliedAtDesc(email);
     }
 
-    public void updateStatus(Long id, ApplicationStatus status) {
+    public void updateStatus(
+            Long id,
+            ApplicationStatus status,
+            String providerEmail
+    ) {
         JobApplication app = applicationRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Application not found"));
 
+        if (!app.getJobProviderEmail().equals(providerEmail)) {
+            throw new AccessDeniedException("Not authorized");
+        }
+
         app.setStatus(status);
         applicationRepository.save(app);
+
+        if (status == ApplicationStatus.APPROVED) {
+            Job job = app.getJob();
+            job.setActive(false);
+            jobRepository.save(job);
+        }
+
+        // REAL-TIME NOTIFICATION
+        webSocketNotificationService.send(app, status);
     }
+
+
+    public List<JobApplication> getApplicantsForJob(Long jobId, String providerEmail) {
+
+        Job job = jobRepository.findById(jobId)
+                .orElseThrow(() -> new RuntimeException("Job not found"));
+
+        if (!job.getPostedByEmail().equals(providerEmail)) {
+            throw new AccessDeniedException("Not authorized");
+        }
+
+        return applicationRepository.findByJobId(jobId);
+    }
+
+
 }

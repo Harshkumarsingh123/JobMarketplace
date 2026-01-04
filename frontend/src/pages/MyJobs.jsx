@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { getMyJobsApi } from "../api/jobApi";
 import "../styles/myJobs.css";
 
 const MyJobs = () => {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     getMyJobsApi()
@@ -33,14 +35,15 @@ const MyJobs = () => {
       <div className="myjobs-grid">
         {jobs.length === 0 && <p>No jobs posted yet</p>}
 
-        {jobs.map((job) => (
+        {jobs.map(({ job, applicants }) => (
           <div className="myjobs-card" key={job.id}>
             <h3>{job.title}</h3>
 
             <p>📍 {job.address}</p>
 
             <p>
-              ⏰ {job.startDateTime
+              ⏰{" "}
+              {job.startDateTime
                 ? new Date(job.startDateTime).toLocaleString()
                 : "Not specified"}
             </p>
@@ -48,11 +51,19 @@ const MyJobs = () => {
             <p className="pay">💰 ₹ {job.pay}</p>
 
             <div className="job-footer">
-              <span className="status active">ACTIVE</span>
-              <span className="applicants">👥 0 applicants</span>
+              <span className={`status ${job.active ? "active" : "closed"}`}>
+                {job.active ? "ACTIVE" : "CLOSED"}
+              </span>
+
+              <span className="applicants">👥 {applicants} applicants</span>
             </div>
 
-            <button className="manage-btn">Manage Job</button>
+            <button
+              className="manage-btn"
+              onClick={() => navigate(`/my-jobs/${job.id}`)}
+            >
+              Manage Job
+            </button>
           </div>
         ))}
       </div>
