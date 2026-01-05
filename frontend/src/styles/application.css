@@ -93,3 +93,96 @@
     transform: translateY(0);
   }
 }
+
+.applications-page {
+  padding: 20px;
+}
+
+.page-title {
+  margin-bottom: 16px;
+}
+
+.applications-card {
+  background: #fff;
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 14px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+
+.applicant-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.status-badge {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status-badge.pending {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status-badge.approved {
+  background: #d4edda;
+  color: #155724;
+}
+
+.status-badge.rejected {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.status-badge.paid {
+  background: #d1ecf1;
+  color: #0c5460;
+}
+
+.action-row {
+  margin-top: 12px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.btn {
+  padding: 8px 14px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.btn.approve {
+  background: #28a745;
+  color: white;
+}
+
+.btn.reject {
+  background: #dc3545;
+  color: white;
+}
+
+.btn.pay {
+  background: #007bff;
+  color: white;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.paid-label {
+  font-weight: 600;
+  color: #28a745;
+}
+
+.empty-text {
+  color: #777;
+}

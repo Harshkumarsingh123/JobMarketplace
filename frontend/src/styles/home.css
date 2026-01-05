@@ -504,3 +504,15 @@ body {
   text-align: center;
   color: gray;
 }
+.footer-link {
+  display: block;
+  color: #ddd;
+  text-decoration: none;
+  margin: 6px 0;
+  font-size: 14px;
+}
+
+.footer-link:hover {
+  color: #fff;
+  text-decoration: underline;
+}

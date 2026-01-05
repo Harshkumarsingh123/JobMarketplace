@@ -218,13 +218,6 @@ const PostJob = () => {
               onChange={handleChange}
               required
             />
-
-            <input
-              type="time"
-              name="endTime"
-              value={job.endTime}
-              onChange={handleChange}
-            />
           </div>
 
           <input

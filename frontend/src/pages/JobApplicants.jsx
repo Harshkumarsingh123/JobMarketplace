@@ -8,32 +8,40 @@ import {
   createOrderApi,
   verifyPaymentApi,
 } from "../api/paymentApi";
+import "../styles/application.css";
 
 const JobApplicants = () => {
   const { jobId } = useParams();
   const [apps, setApps] = useState([]);
-  const [paying, setPaying] = useState(false);
+  const [payingId, setPayingId] = useState(null);
 
   useEffect(() => {
     loadApplicants();
   }, [jobId]);
 
-  const loadApplicants = () => {
-    getApplicantsForJobApi(jobId)
-      .then((res) => setApps(res.data))
-      .catch(console.error);
-  };
-
-  // ✅ APPROVE / REJECT
-  const updateStatus = async (id, status) => {
-    await updateApplicationStatusApi(id, status);
-    loadApplicants();
-  };
-
-  // ✅ PAY NOW (ONLY AFTER APPROVAL)
-  const payNow = async (jobId) => {
+  const loadApplicants = async () => {
     try {
-      setPaying(true);
+      const res = await getApplicantsForJobApi(jobId);
+      setApps(res.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  /* ---------------- APPROVE / REJECT ---------------- */
+  const updateStatus = async (id, status) => {
+    try {
+      await updateApplicationStatusApi(id, status);
+      loadApplicants();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  /* ---------------- PAY NOW ---------------- */
+  const payNow = async (jobId, appId) => {
+    try {
+      setPayingId(appId);
 
       const res = await createOrderApi(jobId);
 
@@ -63,53 +71,69 @@ const JobApplicants = () => {
       console.error(err);
       alert("❌ Payment failed");
     } finally {
-      setPaying(false);
+      setPayingId(null);
     }
   };
 
   return (
-    <div style={{ padding: 20 }}>
-      <h2>Applicants</h2>
+    <div className="applications-page">
+      <h2 className="page-title">Job Applicants</h2>
 
-      {apps.length === 0 && <p>No applicants yet</p>}
+      {apps.length === 0 && (
+        <p className="empty-text">No applicants yet</p>
+      )}
 
       {apps.map((app) => (
         <div key={app.id} className="applications-card">
-          <h3>{app.applicantName}</h3>
+          <div className="applicant-header">
+            <h3>{app.applicantName}</h3>
+            <span className={`status-badge ${app.status.toLowerCase()}`}>
+              {app.status}
+            </span>
+          </div>
+
           <p>📧 {app.applicantEmail}</p>
           <p>📞 {app.applicantPhone}</p>
           <p>🛠 {app.applicantSkills}</p>
 
-          <p>
-            Status: <b>{app.status}</b>
-          </p>
+          {/* ACTIONS */}
+          <div className="action-row">
 
-          {/* PENDING */}
-          {app.status === "PENDING" && (
-            <>
-              <button onClick={() => updateStatus(app.id, "APPROVED")}>
-                ✅ Approve
+            {/* PENDING → APPROVE / REJECT */}
+            {app.status === "PENDING" && (
+              <>
+                <button
+                  className="btn approve"
+                  onClick={() => updateStatus(app.id, "APPROVED")}
+                >
+                  Approve
+                </button>
+
+                <button
+                  className="btn reject"
+                  onClick={() => updateStatus(app.id, "REJECTED")}
+                >
+                  Reject
+                </button>
+              </>
+            )}
+
+            {/* APPROVED → PAY NOW */}
+            {app.status === "APPROVED" && (
+              <button
+                className="btn pay"
+                disabled={payingId === app.id}
+                onClick={() => payNow(app.job.id, app.id)}
+              >
+                {payingId === app.id ? "Processing..." : "Pay Now"}
               </button>
-              <button onClick={() => updateStatus(app.id, "REJECTED")}>
-                ❌ Reject
-              </button>
-            </>
-          )}
+            )}
 
-          {/* APPROVED → PAY */}
-          {app.status === "APPROVED" && (
-            <button
-              disabled={paying}
-              onClick={() => payNow(app.job.id)}
-            >
-              💳 Pay Now (5% Commission)
-            </button>
-          )}
-
-          {/* PAID */}
-          {app.status === "PAID" && (
-            <span className="paid-badge">✅ Paid</span>
-          )}
+            {/* PAID */}
+            {app.status === "PAID" && (
+              <span className="paid-label">✅ Payment Completed</span>
+            )}
+          </div>
         </div>
       ))}
     </div>
