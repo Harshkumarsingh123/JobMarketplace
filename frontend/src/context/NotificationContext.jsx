@@ -1,41 +1,37 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import axios from "axios";
-import { useAuth } from "./AuthContext";
 
 const NotificationContext = createContext();
 
 export const NotificationProvider = ({ children }) => {
-  const { user } = useAuth();
   const [notifications, setNotifications] = useState([]);
 
-  // ✅ LOAD NOTIFICATIONS FROM BACKEND
   useEffect(() => {
-    if (!user) return;
-
     axios
       .get("http://localhost:8080/api/notifications", {
         headers: {
           Authorization: "Bearer " + localStorage.getItem("token"),
         },
       })
-      .then((res) => setNotifications(res.data))
-      .catch(console.error);
-  }, [user]);
+      .then((res) => {
+        setNotifications(res.data.map(n => ({ ...n, read: n.isRead })));
+      });
+  }, []);
 
   const addNotification = (notification) => {
     setNotifications((prev) => [
-      { ...notification, isRead: false },
+      { ...notification, read: false },
       ...prev,
     ]);
   };
 
   const markAllRead = () => {
     setNotifications((prev) =>
-      prev.map((n) => ({ ...n, isRead: true }))
+      prev.map((n) => ({ ...n, read: true }))
     );
   };
 
-  const unreadCount = notifications.filter((n) => !n.isRead).length;
+  const unreadCount = notifications.filter((n) => !n.read).length;
 
   return (
     <NotificationContext.Provider

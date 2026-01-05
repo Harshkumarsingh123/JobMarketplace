@@ -49,7 +49,7 @@ public class SecurityConfig {
                                 "/ws/**"
                         ).permitAll()
 
-
+                        .requestMatchers("/api/payments/**").authenticated()
                         .requestMatchers("/api/profile/**").authenticated()
                         .requestMatchers("/api/jobs/**").authenticated()
                         .requestMatchers("/api/applications/**").authenticated()

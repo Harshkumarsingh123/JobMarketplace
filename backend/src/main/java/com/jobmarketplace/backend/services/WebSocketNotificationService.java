@@ -13,30 +13,31 @@ public class WebSocketNotificationService {
 
     private final SimpMessagingTemplate messagingTemplate;
 
-    public void send(JobApplication app, ApplicationStatus status) {
-
-        NotificationMessage msg = new NotificationMessage(
-                status.name(),
-                status == ApplicationStatus.APPROVED
-                        ? "🎉 Your application for '" + app.getJob().getTitle() + "' is APPROVED!"
-                        : "❌ Your application for '" + app.getJob().getTitle() + "' was REJECTED.",
-                app.getJob().getId()
-        );
-
-        messagingTemplate.convertAndSendToUser(
-                app.getApplicantEmail(),
-                "/queue/notifications",
-                msg
+    // 🔔 notify job provider when someone applies
+    public void notifyProviderOnApply(JobApplication app) {
+        messagingTemplate.convertAndSend(
+                "/topic/provider/" + app.getJobProviderEmail(),
+                new NotificationMessage(
+                        "APPLY",
+                        "📩 New application for " + app.getJob().getTitle(),
+                        app.getJob().getId()
+                )
         );
     }
 
-    public void notifyProviderOnApply(JobApplication app) {
-        messagingTemplate.convertAndSendToUser(
-                app.getJobProviderEmail(),
-                "/queue/notifications",
+    // 🔔 notify job seeker on approve / reject
+    public void send(JobApplication app, ApplicationStatus status) {
+
+        String msg =
+                status == ApplicationStatus.APPROVED
+                        ? "🎉 Your application for '" + app.getJob().getTitle() + "' is APPROVED!"
+                        : "❌ Your application for '" + app.getJob().getTitle() + "' was REJECTED.";
+
+        messagingTemplate.convertAndSend(
+                "/topic/seeker/" + app.getApplicantEmail(),
                 new NotificationMessage(
-                        "APPLY",
-                        "📥 New application for '" + app.getJob().getTitle() + "'",
+                        status.name(),
+                        msg,
                         app.getJob().getId()
                 )
         );

@@ -1,6 +1,6 @@
+import { useEffect } from "react";
 import SockJS from "sockjs-client";
 import { Client } from "@stomp/stompjs";
-import { useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useNotifications } from "../context/NotificationContext";
 
@@ -9,22 +9,36 @@ export const useWebSocketNotifications = () => {
   const { addNotification } = useNotifications();
 
   useEffect(() => {
-    if (!user) return;
-
-    const socket = new SockJS("http://localhost:8080/ws");
+    if (!user?.email) return;
 
     const client = new Client({
-      webSocketFactory: () => socket,
+      webSocketFactory: () => new SockJS("http://localhost:8080/ws"),
       reconnectDelay: 5000,
+      debug: () => {},
+
+      onConnect: () => {
+        console.log("✅ WebSocket connected");
+
+        // 🔔 JOB PROVIDER notifications
+        client.subscribe(`/topic/provider/${user.email}`, (msg) => {
+          addNotification(JSON.parse(msg.body));
+        });
+
+        // 🔔 JOB SEEKER notifications
+        client.subscribe(`/topic/seeker/${user.email}`, (msg) => {
+          addNotification(JSON.parse(msg.body));
+        });
+      },
+
+      onStompError: (frame) => {
+        console.error("STOMP error", frame);
+      },
     });
 
-    client.onConnect = () => {
-      client.subscribe("/user/queue/notifications", (msg) => {
-        addNotification(JSON.parse(msg.body));
-      });
-    };
-
     client.activate();
-    return () => client.deactivate();
+
+    return () => {
+      client.deactivate();
+    };
   }, [user]);
 };
